@@ -1,13 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desmos Graph</title>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+    <div id="calculator-container">
+        <div id="loading">Loading...</div>
+        <div id="calculator"></div>
+    </div>
+
+    <script src="https://www.desmos.com/api/v1.0/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const calculatorElement = document.getElementById('calculator');
+            const loadingElement = document.getElementById('loading');
+
+            if (calculatorElement) {
+                const calculator = Desmos.Calculator(calculatorElement, {
+                    expressions: false, // Hide expressions list
+                    settingsMenu: false, // Hide settings menu
+                    zoomButtons: false, // Hide zoom buttons
+                    toolBar: false, // Hide tool bar
+                    shareButton: false // Hide share button
+                });
+
+                // Set up the graph and configure axis
+                calculator.setExpression({ id: 'graph1', latex: 'y = x^2' });
+                calculator.setState({
+                    xAxis: { label: 'x', min: 0 },
+                    yAxis: { label: 'y' }
+                });
+
+                // Hide loading and show calculator when ready
+                calculatorElement.style.display = 'block';
+                loadingElement.style.display = 'none';
+            } else {
+                console.error('Element with id "calculator" not found.');
+            }
+        });
+    </script>
+</body>
 </html>
