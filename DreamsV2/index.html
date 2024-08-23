@@ -1,44 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desmos Graph</title>
-    <link rel="stylesheet" href="src/styles.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Graph Your Input with Timestamps</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <style>
+        /* Reset margins and paddings */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            background-color: #f4f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        /* Main container styling */
+        #container {
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            width: 60%;
+            max-width: 800px;
+        }
+
+        /* Title styling */
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #2a9d8f;
+            margin-bottom: 20px;
+        }
+
+        /* Input and button container */
+        #input-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        /* Input box styling */
+        #dataInput {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 180px;
+            margin-right: 10px;
+        }
+
+        /* Button styling */
+        #addDataButton {
+            background-color: #2a9d8f;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #addDataButton:hover {
+            background-color: #21867a;
+        }
+
+        /* Chart container */
+        #chart-container {
+            width: 100%;
+        }
+
+        /* Footer note */
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <div id="calculator-container">
-        <div id="loading">Loading...</div>
-        <div id="calculator"></div>
+    <div id="container">
+        <h1>Graph Your Input with Timestamps</h1>
+        <div id="input-container">
+            <input type="number" id="dataInput" placeholder="Enter a value">
+            <button id="addDataButton">Add to Graph</button>
+        </div>
+        <div id="chart-container">
+            <canvas id="chart" style="width: 100%; height: 400px;"></canvas>
+        </div>
+        <footer>Visualize your data with timestamps.</footer>
     </div>
 
-    <script src="https://www.desmos.com/api/v1.0/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const calculatorElement = document.getElementById('calculator');
-            const loadingElement = document.getElementById('loading');
+        const xValues = [];
+        const yValues = [];
 
-            if (calculatorElement) {
-                const calculator = Desmos.Calculator(calculatorElement, {
-                    expressions: false, // Hide expressions list
-                    settingsMenu: false, // Hide settings menu
-                    zoomButtons: false, // Hide zoom buttons
-                    toolBar: false, // Hide tool bar
-                    shareButton: false // Hide share button
-                });
+        const chart = new Chart(document.getElementById("chart"), {
+            type: "line",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    label: 'User Input Data',
+                    data: yValues,
+                    borderColor: "#2a9d8f",
+                    backgroundColor: "rgba(42, 157, 143, 0.1)",
+                    fill: true,
+                    lineTension: 0.3,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: "#2a9d8f"
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: { display: true },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Time' },
+                        type: 'time',
+                        time: {
+                            displayFormats: {
+                                second: 'h:mm:ss a'
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: { 
+                        title: { display: true, text: 'Value' },
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        grid: {
+                            color: '#ddd'
+                        }
+                    }
+                }
+            }
+        });
 
-                // Set up the graph and configure axis
-                calculator.setExpression({ id: 'graph1', latex: 'y = x^2' });
-                calculator.setState({
-                    xAxis: { label: 'x', min: 0 },
-                    yAxis: { label: 'y' }
-                });
-
-                // Hide loading and show calculator when ready
-                calculatorElement.style.display = 'block';
-                loadingElement.style.display = 'none';
-            } else {
-                console.error('Element with id "calculator" not found.');
+        document.getElementById('addDataButton').addEventListener('click', () => {
+            const inputValue = document.getElementById('dataInput').value;
+            if (inputValue) {
+                const currentTime = new Date();  // Get the current time
+                xValues.push(currentTime);  // Add the current time to x-axis
+                yValues.push(Number(inputValue));  // Add input value to y-axis
+                chart.update();  // Update the chart with the new data
+                document.getElementById('dataInput').value = '';  // Clear input field
             }
         });
     </script>
