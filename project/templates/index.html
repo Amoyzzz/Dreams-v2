@@ -2,126 +2,23 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Sleep Data Collection</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dreams Boilerplate</title>
+  <!-- Correct way to link static files -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
-    <h1>Live Sleep Data Collection</h1>
-    <button onclick="startCollection()">Start Data Collection</button>
-    <button onclick="stopCollection()">Stop Data Collection</button>
-    <button onclick="analyzeSleep()">Analyze Sleep Periods</button>
-    <button onclick="getData()">Get Stored Data</button>
+  <h1>Hey!</h1>
 
-    <div id="status">Status: Not Started</div>
-    <div id="graph"></div>
-    <div id="analysis-result"></div>
-    <div id="data-result"></div>
+  <!-- Form with a button to trigger the method -->
+  <form action="/data_retrieve" method="POST">
+    <button type="submit">Run Method</button>
+  </form>
 
-    <script>
-        // Initialize Socket.IO
-        let socket = io();
-
-        // Initialize data arrays
-        let time = [];
-        let accMagnitude = [];
-
-        function updateStatus(status) {
-            document.getElementById('status').textContent = 'Status: ' + status;
-        }
-
-        function startCollection() {
-            fetch('/start')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'started') {
-                        updateStatus('Started');
-                        socket.emit('start');
-                    }
-                })
-                .catch(error => console.error('Error starting collection:', error));
-        }
-
-        function stopCollection() {
-            fetch('/stop')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'stopped') {
-                        updateStatus('Stopped');
-                        socket.emit('stop');
-                    }
-                })
-                .catch(error => console.error('Error stopping collection:', error));
-        }
-
-        function analyzeSleep() {
-            fetch('/analyze')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        document.getElementById('analysis-result').textContent = data.error;
-                    } else {
-                        let resultHtml = '<h2>Sleep Periods Analysis</h2>';
-                        data.forEach(entry => {
-                            resultHtml += `<p><strong>${entry.time}</strong>: ${entry.sleep_period}</p>`;
-                        });
-                        document.getElementById('analysis-result').innerHTML = resultHtml;
-                    }
-                })
-                .catch(error => console.error('Error analyzing sleep:', error));
-        }
-
-        function getData() {
-            fetch('/data')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        document.getElementById('data-result').textContent = data.error;
-                    } else {
-                        let resultHtml = '<h2>Stored Data</h2>';
-                        resultHtml += '<p><strong>Time Values:</strong> ' + JSON.stringify(data.time_values) + '</p>';
-                        resultHtml += '<p><strong>Acceleration Magnitude Values:</strong> ' + JSON.stringify(data.acc_magnitude_values) + '</p>';
-                        resultHtml += '<p><strong>Sleep Stages:</strong> ' + JSON.stringify(data.sleep_stages) + '</p>';
-                        document.getElementById('data-result').innerHTML = resultHtml;
-                    }
-                })
-                .catch(error => console.error('Error retrieving data:', error));
-        }
-
-        socket.on('update', function (data) {
-            time.push(new Date(data.time));
-            accMagnitude.push(data.acc_magnitude);
-
-            if (time.length > 100) {
-                time.shift();
-                accMagnitude.shift();
-            }
-
-            const trace = {
-                x: time,
-                y: accMagnitude,
-                mode: 'lines',
-                line: { shape: 'spline', color: '#007bff', width: 2 },
-                name: 'Absolute Acceleration'
-            };
-
-            const layout = {
-                title: 'Live Absolute Acceleration Data',
-                xaxis: { title: 'Time', showgrid: false },
-                yaxis: { title: 'Absolute Acceleration (m/s²)', showgrid: true, zeroline: false },
-                margin: { l: 40, r: 20, t: 40, b: 30 },
-                paper_bgcolor: '#f4f4f9',
-                plot_bgcolor: '#fff',
-                font: { size: 12 }
-            };
-
-            Plotly.react('graph', [trace], layout);
-        });
-    </script>
+  <!-- Correct way to link JS files -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>
