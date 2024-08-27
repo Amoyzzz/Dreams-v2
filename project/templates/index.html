@@ -14,7 +14,14 @@
 
   <!-- Form with a button to trigger the method -->
   <form action="/data_retrieve" method="POST">
-    <button type="submit">Run Method</button>
+    <button type="submit">Start Data</button>
+  </form>
+
+  <!-- Display message if it exists -->
+  <h1>{{ message }}</h1>
+
+  <form action="/end_data" method="POST">
+    <button type="submit">Stop Data</button>
   </form>
 
   <!-- Correct way to link JS files -->
