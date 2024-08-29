@@ -2,11 +2,18 @@ from flask import Flask, render_template, request
 import requests
 import time
 import json
+import os
+from datetime import datetime
 
 app = Flask(__name__)
 PP_ADDRESS = "http://192.168.86.38/"
 PP_CHANNELS = ['accX', 'accY', 'accZ']
 run = False  # Declare as a global variable
+
+# Directory to save data files
+DATA_DIR = 'data_files'
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
 @app.route('/')
 def index():
@@ -17,27 +24,35 @@ def index():
 def data_retrieve():
     global run  # Access the global 'run' variable
     run = True
-    # Simulate running a method
-    message = "Method has been triggered!"
-    
-    while run:
-        print("METHOD IS TRIGGERING !!!")
-        time.sleep(1)  # Sleep to avoid locking the CPU with an infinite loop
-        # Uncomment and modify this block when you're ready to fetch data from Phyphox
-        # url = PP_ADDRESS + "/get?" + ("&".join(PP_CHANNELS))
-        # try:
-        #     getRequest = requests.get(url).text
-        # except:
-        #     print("No Data At the Moment, Please Restart")
-        #     break
-        # data = json.loads(getRequest)
-        # for channel in PP_CHANNELS:
-        #     acc_data = data['buffer'][channel]['buffer'][0]
-        #     print(f'{acc_data:10.7}', end='\t')
+    # Generate a unique filename with a timestamp
+    filename = os.path.join(DATA_DIR, f'data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt')
 
-        # Check for `run` being False to stop the loop
-        if not run:
-            break
+    # Open the file in write mode
+    with open(filename, 'w') as f:
+        message = "Method has been triggered!"
+        
+        while run:
+            time.sleep(0.1)  # Sleep to avoid locking the CPU with an infinite loop
+            url = PP_ADDRESS + "/get?" + ("&".join(PP_CHANNELS))
+            try:
+                getRequest = requests.get(url).text
+            except:
+                print("No Data At the Moment, Please Restart")
+                break
+            
+            data = json.loads(getRequest)
+            
+            # Write the data to the file
+            for channel in PP_CHANNELS:
+                acc_data = data['buffer'][channel]['buffer'][0]
+                print(f'{channel}: {acc_data:10.7}\n')
+                f.write(f'{channel}: {acc_data:10.7}\n')
+            
+            f.write('\n')  # Add a newline after each data point for clarity
+
+            # Check for `run` being False to stop the loop
+            if not run:
+                break
 
     return render_template('index.html', message=message)
 
